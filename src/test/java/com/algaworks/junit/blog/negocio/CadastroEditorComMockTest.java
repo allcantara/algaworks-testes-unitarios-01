@@ -1,6 +1,7 @@
 package com.algaworks.junit.blog.negocio;
 
 import com.algaworks.junit.blog.armazenamento.ArmazenamentoEditor;
+import com.algaworks.junit.blog.exception.EditorNaoEncontradoException;
 import com.algaworks.junit.blog.exception.RegraNegocioException;
 import com.algaworks.junit.blog.modelo.Editor;
 import org.junit.jupiter.api.*;
@@ -19,8 +20,6 @@ import static org.mockito.Mockito.*;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class CadastroEditorComMockTest {
 
-    Editor editor;
-
     @Captor
     ArgumentCaptor<Mensagem> mensagemArgumentCaptor;
 
@@ -35,10 +34,11 @@ class CadastroEditorComMockTest {
 
     @Nested
     class CadastroEditorValido {
+        @Spy
+        Editor editor = new Editor(null, "Bruno", "bruno@email", BigDecimal.TEN, true);
+
         @BeforeEach
         void beforeEach() {
-            editor = new Editor(null, "Bruno", "bruno@email", BigDecimal.TEN, true);
-
             when(armazenamentoEditor.salvar(any(Editor.class))).thenAnswer(invocacao -> {
                 Editor editorPassado = invocacao.getArgument(0, Editor.class);
                 editorPassado.setId(1L);
@@ -80,9 +80,8 @@ class CadastroEditorComMockTest {
 
         @Test
         void Dado_um_editor_valido_Quanto_cadastrar_Entao_deve_verificar_o_email() {
-            Editor editorSpy = spy(editor);
-            cadastroEditor.criar(editorSpy);
-            verify(editorSpy, atLeast(1)).getEmail();
+            cadastroEditor.criar(editor);
+            verify(editor, atLeast(1)).getEmail();
         }
 
         @Test
@@ -121,6 +120,43 @@ class CadastroEditorComMockTest {
 
     @Nested
     class EdicaoComEditorValido {
+
+        @Spy
+        Editor editor = new Editor(1L, "Bruno", "bruno@email", BigDecimal.TEN, true);
+
+        @BeforeEach
+        void beforeEach() {
+            when(armazenamentoEditor.salvar(editor)).thenAnswer(invocacao -> invocacao.getArgument(0, Editor.class));
+            when(armazenamentoEditor.encontrarPorId(1L)).thenReturn(Optional.of(editor));
+        }
+
+        @Test
+        void Dado_um_editor_valido_Quando_editar_Entao_deve_alterar_editor_valido() {
+            Editor editorAlterado = new Editor(1L, "Vinicius", "vinicius@email", BigDecimal.ZERO, false);
+            cadastroEditor.editar(editorAlterado);
+            verify(editor).atualizarComDados(editorAlterado);
+            InOrder inOrder = inOrder(editor, armazenamentoEditor);
+            inOrder.verify(editor).atualizarComDados(editorAlterado);
+            inOrder.verify(armazenamentoEditor).salvar(editor);
+        }
+
+    }
+
+    @Nested
+    class EdicaoComEditorInexistente {
+
+        Editor editor = new Editor(99L, "Bruno", "bruno@email", BigDecimal.TEN, true);
+
+        @BeforeEach
+        void beforeEach() {
+            when(armazenamentoEditor.encontrarPorId(99L)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void Dado_um_editor_inexistente_Quando_editar_Entao_deve_lancar_exception() {
+            assertThrows(EditorNaoEncontradoException.class, () -> cadastroEditor.editar(editor));
+            verify(armazenamentoEditor, never()).salvar(any());
+        }
 
     }
 
