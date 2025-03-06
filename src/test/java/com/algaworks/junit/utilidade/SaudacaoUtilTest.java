@@ -1,9 +1,14 @@
 package com.algaworks.junit.utilidade;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import static com.algaworks.junit.utilidade.SaudacaoTestConditions.igualBomDia;
 import static com.algaworks.junit.utilidade.SaudacaoUtil.saudar;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Testes do utilitário [SaudacaoUtil]")
@@ -13,14 +18,11 @@ class SaudacaoUtilTest {
     @Test
     @DisplayName("Deve saudar com bom dia")
     public void saudarComBomDia() {
-        // Arrange
         int horaValida = 9;
-
-        // Action
         String saudacao = assertDoesNotThrow(() -> saudar(horaValida));
-
-        // Assert
         assertEquals("Bom dia", saudacao);
+
+        assertThat(saudacao).is(igualBomDia());
     }
 
     @Test
@@ -55,17 +57,20 @@ class SaudacaoUtilTest {
     }
 
     @Test
-    @Disabled("Teste [deveLancarException] desabilitado")
+//    @Disabled("Teste [deveLancarException] desabilitado")
     public void Dado_uma_hora_invalida_quando_saudar_entao_deve_lanca_exception() {
-        // Arrange
         int horaInvalida = -2;
 
-        // Action
-        Executable chamadaInvalidaDeMetodo = () -> saudar(horaInvalida);
+        assertThatThrownBy(() -> saudar(horaInvalida))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Hora invalida");
+    }
 
-        // Assert
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, chamadaInvalidaDeMetodo);
-        assertEquals("Hora inválida", e.getMessage());
+    @ParameterizedTest
+    @ValueSource(ints = {5, 6, 7, 8, 9, 10, 11})
+    public void Dado_um_horario_matinal_Quando_saudar_entao_deve_retornar_bom_dia(int horaValida) {
+        String saudacao = assertDoesNotThrow(() -> saudar(horaValida));
+        assertEquals("Bom dia", saudacao);
     }
 
 }

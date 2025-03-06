@@ -35,7 +35,7 @@ class CadastroEditorComMockTest {
     @Nested
     class CadastroEditorValido {
         @Spy
-        Editor editor = new Editor(null, "Bruno", "bruno@email", BigDecimal.TEN, true);
+        Editor editor = EditorTestData.getEditorNovo().build();
 
         @BeforeEach
         void beforeEach() {
@@ -122,7 +122,7 @@ class CadastroEditorComMockTest {
     class EdicaoComEditorValido {
 
         @Spy
-        Editor editor = new Editor(1L, "Bruno", "bruno@email", BigDecimal.TEN, true);
+        Editor editor = EditorTestData.getEditorExistente().build();
 
         @BeforeEach
         void beforeEach() {
@@ -132,7 +132,11 @@ class CadastroEditorComMockTest {
 
         @Test
         void Dado_um_editor_valido_Quando_editar_Entao_deve_alterar_editor_valido() {
-            Editor editorAlterado = new Editor(1L, "Vinicius", "vinicius@email", BigDecimal.ZERO, false);
+            Editor editorAlterado = EditorTestData.getEditorExistente()
+                    .nome("Nome Alterado")
+                    .email("emailAlterado@email.com")
+                    .build();
+
             cadastroEditor.editar(editorAlterado);
             verify(editor).atualizarComDados(editorAlterado);
             InOrder inOrder = inOrder(editor, armazenamentoEditor);
@@ -145,7 +149,7 @@ class CadastroEditorComMockTest {
     @Nested
     class EdicaoComEditorInexistente {
 
-        Editor editor = new Editor(99L, "Bruno", "bruno@email", BigDecimal.TEN, true);
+        Editor editor = EditorTestData.getEditorInexistente().build();
 
         @BeforeEach
         void beforeEach() {

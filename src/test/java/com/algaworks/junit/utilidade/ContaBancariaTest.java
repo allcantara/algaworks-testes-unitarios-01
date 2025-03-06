@@ -15,7 +15,7 @@ class ContaBancariaTest {
         void deveLancarExceptionCasoSaldoSejaNull() {
             IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
                     () -> new ContaBancaria(null));
-            assertEquals("O saldo não pode ser null", illegalArgumentException.getMessage());
+            assertEquals("O saldo nao pode ser null", illegalArgumentException.getMessage());
         }
 
         @Test

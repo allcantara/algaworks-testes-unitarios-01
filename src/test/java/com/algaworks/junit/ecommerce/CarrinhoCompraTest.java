@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Carrinho de Compras")
@@ -315,6 +316,21 @@ class CarrinhoCompraTest {
                 carrinho.adicionarProduto(produto, 1);
                 carrinho.esvaziar();
                 assertEquals(0, carrinho.getItens().size());
+            }
+
+            @Test
+            @DisplayName("Deve conter apenas produtos adicionados")
+            void deveConterProdutosAdicionados() {
+                carrinho.adicionarProduto(produto, 1);
+                Produto novoProduto = new Produto(2L, "Maquina de cafe", "Maquina de fazer café", new BigDecimal("1000"));
+                carrinho.adicionarProduto(novoProduto, 1);
+
+                Produto produtoNaoAdicionado = new Produto(2L, "Monitor", "Monitor Dell", new BigDecimal("1300"));
+
+                assertThat(carrinho.getItens())
+                        .flatMap(ItemCarrinhoCompra::getProduto)
+                        .contains(produto, novoProduto)
+                        .doesNotContain(produtoNaoAdicionado);
             }
 
         }

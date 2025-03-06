@@ -14,7 +14,7 @@ public class ContaBancaria {
         //TODO 2 - pode ser zero ou negativo
 
         if (isNull(saldo)) {
-            throw new IllegalArgumentException("O saldo não pode ser null");
+            throw new IllegalArgumentException("O saldo nao pode ser null");
         }
 
         this.saldoConta = saldo;
